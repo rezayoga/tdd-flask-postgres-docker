@@ -2,11 +2,17 @@
 FROM python:3.10.3-slim-buster
 
 # set working directory
-WORKDIR /Users/rezayoga/VisualStudioCodeProjects/flask-tdd-docker/project
+WORKDIR /usr/src/app
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+
+# new
+# install system dependencies
+RUN apt-get update \
+    && apt-get -y install netcat gcc postgresql \
+    && apt-get clean
 
 # add and install requirements
 COPY ./requirements.txt .
@@ -15,11 +21,7 @@ RUN pip install -r requirements.txt
 # add app
 COPY . .
 
-# run server
-CMD python manage.py run -h 0.0.0.0
-
-# pull official base image
-FROM postgres:14-alpine
-
-# run create.sql on init
-ADD create.sql /docker-entrypoint-initdb.d
+# new
+# add entrypoint.sh
+COPY ./entrypoint.sh .
+RUN chmod +x /usr/src/app/entrypoint.sh
